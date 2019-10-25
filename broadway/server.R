@@ -3,12 +3,16 @@ library(dplyr)
 library(ggplot2)
 library(data.table)
 
+
+
+
+
 broadway <- fread(file = "./broadway.csv")
 head(broadway)
 
 
-broadway.count <- broadway%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
-    summarise(.,count=n())%>%arrange(desc(count))%>%top_n(20)
+broadway.count <- broadway%>%select(.,Show.Name,Show.Type)%>%group_by(.,Show.Name)%>%
+    summarise(.,count=n())%>%arrange(desc(count))
 head(broadway.count)
 ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
@@ -16,17 +20,21 @@ ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + g
 
 server <- function(input, output) {
     
-    # # love count data
-    # lovecount_subset <- reactive({
-    #     req(input$disc)
-    #     filter(love_counts, disc_number %in% input$disc)
-    # })
-    # toplove_subset <- reactive({
-    #     req(input$disc)
-    #     filter(top_love, disc_number %in% input$disc)
-    # })
-    # commentary_subset <- reactive({
-    #     req(input$disc)
+    # broadway running week data
+    broadway.count <- reactive({
+        req(input$showtype)
+        filter(broadway, Show.Type %in% input$showtype)%>%
+            filter(., Date.Year %in% c(input$showyear[1]:input$showyear[2]))%>%
+            select(.,Show.Name)%>%group_by(.,Show.Name)%>%
+            summarise(.,count=n())%>%arrange(desc(count))%>%top_n(20)
+    })
+    broadway.mean <- reactive({
+        req(input$showtype)
+        filter(broadway, Show.Type %in% input$showtype)%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
+            summarise(.,count=n())%>%summarise(.mean=mean(count))
+    })
+    # broadway.year <- reactive({
+    #     req(input$shownames)
     #     filter(commentary, disc_number %in% input$disc)
     # })
     # averages_subset <- reactive({
@@ -38,10 +46,10 @@ server <- function(input, output) {
     # The Book of Shows
     output$bookofshows <- renderPlot({
         
-        ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + 
+        ggplot(data = broadway.count(),aes(x = reorder(Show.Name, -count), y = count)) + 
             geom_bar(stat="identity",show.legend = FALSE) +
-            geom_hline(aes(yintercept = 250), linetype = 2, show.legend = FALSE) +
-            geom_text(data = broadway.count, aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
+            geom_hline(aes(yintercept = broadway.mean()[[1]]), linetype = 2, show.legend = FALSE) +
+            geom_text(data = broadway.count(), aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
                       hjust = 1.1, family = "Courier") +
             labs(x = "Track", y = "Running Weeks") +
             theme_minimal() +
@@ -59,21 +67,21 @@ server <- function(input, output) {
     }, height = 500, width = 800)
     
     
-    # # Description of love per volume
-    # output$lovecount_desc <- renderText({ 
-    #     paste("Volume", input$disc, "has an average love count of", averages_subset(), "per song. Indicated by the dotted line.")
-    # })
-    # 
+    # Longest Run Show Names
+    output$shownames <- renderText({
+        paste0(paste(broadway.count()[[1]][1:5], sep="", collapse = ', ')," are the longest running shows from ",input$showyear[1], " to ", input$showyear[2], "." )
+    })
+
     # # word counts (excluding stop words) for word clouds
-    # word_counts <- reactive({ 
+    # word_counts <- reactive({
     #     req(input$disc)
-    #     lovesongs_tidy %>% 
+    #     lovesongs_tidy %>%
     #         filter(disc_number %in% input$disc_cloud) %>%
-    #         select(word) %>% 
+    #         select(word) %>%
     #         anti_join(stop_words, by = "word") %>%
-    #         #filter(word != "love") %>% 
-    #         count(word, sort = TRUE) 
-    # }) 
+    #         #filter(word != "love") %>%
+    #         count(word, sort = TRUE)
+    # })
     # 
     # # Word Clouds
     # output$wordcloud <- renderWordcloud2({

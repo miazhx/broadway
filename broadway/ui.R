@@ -8,10 +8,8 @@ library(tidygraph)
 library(wordcloud2)
 library(glue)
 library(visNetwork)
-
-library(shiny)
-library(shinydashboard)
 library(leaflet)
+
 
 
 ui <- navbarPage(inverse = TRUE, "Broadway Shows",
@@ -48,13 +46,17 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                                wellPanel(style = "background: white",
                                                                          selectInput("showtype",
                                                                                      "Select Show Type:",
-                                                                                     choices = c("All" = "all", "Musical" = "musical", "Play" = "play", "Special" = "special"),
-                                                                                     selected = 1)),
+                                                                                     choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
+                                                                                     selected = 1),
+                                                                         sliderInput("showyear",
+                                                                                     "Select Year Range:",min = 1991, 
+                                                                                     max = 2016, value = c(1991, 2016),
+                                                                                     sep="")),
                                                                wellPanel(style = "background: white",
-                                                                         h3("Info:"),
-                                                                         textOutput("lovecount_desc"),
+                                                                         h3("Longest Running Shows:"),
+                                                                         textOutput("shownames"),
                                                                          br(),
-                                                                         p("The 'loveliest' songs are annotated.")),
+                                                                         p("It never goes wrong with these shows!")),
                                                                wellPanel(style = "background: white",
                                                                          h3("Notes:")             
                                                                )
@@ -72,7 +74,7 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  ),
                  
                  # Third Page - Clouds        
-                 tabPanel("The Book of Shows",
+                 tabPanel("Mama Mia!",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
