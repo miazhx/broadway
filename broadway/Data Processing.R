@@ -4,31 +4,52 @@ library(dplyr)
 library(ggplot2)
 library(data.table)
 
+library(paletteer)
+install.packages("remotes")
+install.packages('ghibli')
+back_col <- paletteer_d(ghibli, MarnieLight1)[2]
+
+library("extrafont")
+fonttable()
+
+
 broadway <- fread(file = "./broadway.csv")
 head(broadway)
 
+# # Running Weeks 
+# broadway.count <- broadway%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
+#   summarise(.,count=n())%>%arrange(desc(count))
+# head(broadway.count)
+# ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
-broadway.count <- broadway%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
-  summarise(.,count=n())%>%arrange(desc(count))
-head(broadway.count)
-ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
+# Prices 
+broadway.price <- broadway%>%filter(Date.Year==2014)%>%sample_n(500)%>%
+  mutate(Price=Statistics.Gross/Statistics.Attendance)
+broadway.price
 
-ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + 
-  geom_bar(stat="identity",show.legend = FALSE) +
-  geom_hline(aes(yintercept = 250), linetype = 2, show.legend = FALSE) +
-  geom_text(data = broadway.count, aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
-            hjust = 1.1, family = "Courier") +
-  labs(x = "Track", y = "Running Weeks") +
-  theme_minimal() +
-  theme(text = element_text(family = "Courier"),
-        panel.grid.minor.x = element_blank(),
-        axis.line.x = element_line(colour = "black", size = 1),
-        axis.text = element_text(size = 12),
+ggplot(broadway.price, aes(x = factor(Date.Month), y = Price)) +
+  geom_jitter(aes(size = Price, fill = Show.Type),
+              width = 0.1, alpha = 0.6, shape = 21) +
+  geom_boxplot(aes(fill = Price), colour = "white", width = 0.4,
+               outlier.shape = NA, alpha = 0.4) + 
+  coord_flip()+ theme(legend.position="bottom")+
+  scale_color_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+  scale_fill_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+  labs(x = "", y = "Price") +
+  theme(text = element_text(colour = "white", family = "AnimeAce"),
+        plot.title = element_text(family = "AnimeAceBold", size = rel(1.5)),
+        plot.caption = element_text(size = rel(0.7)),
+        plot.background = element_rect(fill = back_col),
+        panel.background = element_rect(fill = back_col),
+        panel.grid = element_line(colour = "gray40"),
         panel.grid.major.x = element_blank(),
-        axis.ticks.x = element_line(),
-        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.text = element_text(colour = "white"),
+        legend.direction = "horizontal",
+        legend.background = element_rect(fill = back_col),
+        legend.box.background = element_rect(fill = back_col),
+        legend.key = element_rect(fill = back_col,  colour = back_col),
+        legend.title = element_text(size = rel(0.8)))
+
+
 

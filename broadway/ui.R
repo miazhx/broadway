@@ -1,4 +1,4 @@
-# Broadway Shows - Lyric Analysis
+# Broadway Shows Analysis
 
 # Load libraries
 library(shiny)
@@ -8,8 +8,8 @@ library(tidygraph)
 library(wordcloud2)
 library(glue)
 library(visNetwork)
-library(leaflet)
 
+library(shinyWidgets)
 
 
 ui <- navbarPage(inverse = TRUE, "Broadway Shows",
@@ -32,14 +32,14 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                     br(),
                                     br(),
                                     br(),
-                                    div(p(strong("Built by"), a("Mia Zhang", href = "https://twitter.com/committedtotape"), "using the power of Rstudio and Shiny."), 
+                                    div(p(strong("Built by"), a("Mia Zhang", href = "https://github.com/miazhx/broadway"), "using the power of Rstudio and Shiny."), 
                                         p(strong("R Packages:"), "tidyverse, tidytext, wordcloud2, tidygraph, vizNetwork, glue."),
-                                        p(strong("Sources:"), a("genius.com", href = "https://genius.com/albums/The-magnetic-fields/69-love-songs"), "for data,", a("wikipedia", href = "https://en.wikipedia.org/wiki/69_Love_Songs"), "for design."),
+                                        p(strong("Sources:"), a("CORGIS Dataset Project", href = "https://corgis-edu.github.io/corgis/csv/broadway/"), "for data,", a("David Smale", href = "https://twitter.com/committedtotape"), "for design."),
                                         style="text-align: right;")
                           )
                  ),
                  
-                 # Second Page  - Love Counts       
+                 # Second Page  - The Book of Shows       
                  tabPanel("The Book of Shows",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
@@ -48,7 +48,7 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                                                      "Select Show Type:",
                                                                                      choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
                                                                                      selected = 1),
-                                                                         sliderInput("showyear",
+                                                                         setSliderColor(c("Black ", "Black", "Black", "Black"), c(1,2)),chooseSliderSkin("Nice"),sliderInput("showyear",
                                                                                      "Select Year Range:",min = 1991, 
                                                                                      max = 2016, value = c(1991, 2016),
                                                                                      sep="")),
@@ -63,9 +63,9 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                   ),
                                                   
                                                   mainPanel(
-                                                      p(strong(em("\"How Fucking Romantic, must we really waltz?\""), "1.14 - How Fucking Romantic")),
+                                                      p(strong(em("\"In inches, in miles, in laughter, in strife, in 525,600 minutes, how do you measure a year in the life?\""), "Seasons of Love - Rent")),
                                                       br(),
-                                                      p("But just ", em("how")," romantic is 69 Love Songs? Let's measure this (crudely) by the number of 'loves' in each song:"),
+                                                      p("Let's measure this by the number of running weeks for each show."),
                                                       br(),
                                                       plotOutput("bookofshows", width = "100%")
                                                   )
@@ -73,25 +73,42 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                           )
                  ),
                  
-                 # Third Page - Clouds        
-                 tabPanel("Mama Mia!",
+                 
+                 # Third Page  - Dear Evan Hansen       
+                 tabPanel("DeaR Evan Hansen",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
-                                                                         checkboxGroupInput("disc_cloud",
-                                                                                            "Select your Volume(s):",
-                                                                                            choices = 1:3,
-                                                                                            selected = 1:3)),
-                                                               DT::dataTableOutput("counttable")),
+                                                                         checkboxGroupInput("showtype2",
+                                                                                            "Select Show Type:",
+                                                                                            choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
+                                                                                            selected = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),inline = TRUE),
+
+                                                                         sliderInput("showyear2",
+                                                                                     "Select Year Range:",min = 1991, 
+                                                                                     max = 2016, value = c(1991, 2016),
+                                                                                     sep="")),
+                                                               wellPanel(style = "background: white",
+                                                                         h3("Longest Running Shows:"),
+                                                                         textOutput("shownames2"),
+                                                                         br(),
+                                                                         p("It never goes wrong with these shows!")),
+                                                               wellPanel(style = "background: white",
+                                                                         h3("Notes:")             
+                                                               )
+                                                  ),
                                                   
-                                                  mainPanel( 
-                                                      p(strong(em("\"...It's full of flowers and heart-shaped boxes, and things we're all too young to know.\""), "1.12 - The Book of Love")),
-                                                      p("Unsurprisingly there's a lot of love, but what else? Hover over the word cloud below, or search for words in the table to the right:"),
-                                                      wordcloud2Output("wordcloud", width = "100%", height = "565px")
+                                                  mainPanel(
+                                                    p(strong(em("\"In inches, in miles, in laughter, in strife, in 525,600 minutes, how do you measure a year in the life?\""), "Seasons of Love - Rent")),
+                                                    br(),
+                                                    p("Let's measure this by the number of running weeks for each show."),
+                                                    br(),
+                                                    plotOutput("broadwayprice", width = "100%")
                                                   )
                           )
                           )
                  ),
+        
                  
                  
                  # Sentiment analysis by disc and singer

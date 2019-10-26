@@ -1,20 +1,22 @@
 library(shiny)
-library(dplyr)
-library(ggplot2)
 library(data.table)
+library(tidyverse)
+library(tidytext)
+library(tidygraph)
+library(wordcloud2)
+library(glue)
+library(visNetwork)
 
 
-
+library(paletteer)
+install.packages("remotes")
+install.packages('ghibli')
+back_col <- paletteer_d(ghibli, MarnieLight1)[2]
+library("extrafont")
+fonttable()
 
 
 broadway <- fread(file = "./broadway.csv")
-head(broadway)
-
-
-broadway.count <- broadway%>%select(.,Show.Name,Show.Type)%>%group_by(.,Show.Name)%>%
-    summarise(.,count=n())%>%arrange(desc(count))
-head(broadway.count)
-ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
 
 
@@ -33,18 +35,19 @@ server <- function(input, output) {
         filter(broadway, Show.Type %in% input$showtype)%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
             summarise(.,count=n())%>%summarise(.mean=mean(count))
     })
-    # broadway.year <- reactive({
-    #     req(input$shownames)
-    #     filter(commentary, disc_number %in% input$disc)
-    # })
-    # averages_subset <- reactive({
-    #     req(input$disc)
-    #     filter(averages, disc_number %in% input$disc) %>% 
-    #         pull(avg_love)
-    # })   
+    
+    # broadway price data
+    broadway.price <- reactive({
+      req(input$showtype2)
+      filter(broadway, Show.Type %in% input$showtype2)%>%
+        filter(., Date.Year %in% c(input$showyear2[1]:input$showyear2[2]))%>%
+        sample_n(500)%>%
+        mutate(Price=Statistics.Gross/Statistics.Attendance)
+    })  
     
     # The Book of Shows
     output$bookofshows <- renderPlot({
+        
         
         ggplot(data = broadway.count(),aes(x = reorder(Show.Name, -count), y = count)) + 
             geom_bar(stat="identity",show.legend = FALSE) +
@@ -71,6 +74,35 @@ server <- function(input, output) {
     output$shownames <- renderText({
         paste0(paste(broadway.count()[[1]][1:5], sep="", collapse = ', ')," are the longest running shows from ",input$showyear[1], " to ", input$showyear[2], "." )
     })
+    
+    #Dear Evan Hansen - Price
+    output$broadwayprice <- renderPlot({
+      
+      
+      ggplot(broadway.price(), aes(x = factor(Date.Month), y = Price)) +
+        geom_jitter(aes(size = Price, fill = Show.Type),
+                    width = 0.1, alpha = 0.6, shape = 21) +
+        geom_boxplot(aes(fill = Price), colour = "white", width = 0.4,
+                     outlier.shape = NA, alpha = 0.4) + 
+        coord_flip()+ theme(legend.position="bottom")+
+        scale_color_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+        scale_fill_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+        labs(x = "", y = "Price") +
+        theme(text = element_text(colour = "white", family = "AnimeAce"),
+              plot.title = element_text(family = "AnimeAceBold", size = rel(1.5)),
+              plot.caption = element_text(size = rel(0.7)),
+              plot.background = element_rect(fill = back_col),
+              panel.background = element_rect(fill = back_col),
+              panel.grid = element_line(colour = "gray40"),
+              panel.grid.major.x = element_blank(),
+              axis.text = element_text(colour = "white"),
+              legend.direction = "horizontal",
+              legend.background = element_rect(fill = back_col),
+              legend.box.background = element_rect(fill = back_col),
+              legend.key = element_rect(fill = back_col,  colour = back_col),
+              legend.title = element_text(size = rel(0.8)))
+      
+    }, height = 500, width = 800)
 
     # # word counts (excluding stop words) for word clouds
     # word_counts <- reactive({
