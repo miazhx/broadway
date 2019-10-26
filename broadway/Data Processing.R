@@ -7,19 +7,26 @@ library(data.table)
 library(paletteer)
 install.packages("remotes")
 install.packages('ghibli')
+install.packages('wesanderson')
+library("wesanderson")
+
 back_col <- paletteer_d(ghibli, MarnieLight1)[2]
 
 library("extrafont")
 fonttable()
+windowsFonts("Courier" = windowsFont("Courier"))
 
 
 broadway <- fread(file = "./broadway.csv")
+broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
+                                                    Show.Type == "Play" ~ "#E00008",
+                                                    Show.Type == "Special" ~ "#858B8E"))
 head(broadway)
 
-# # Running Weeks 
-# broadway.count <- broadway%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
-#   summarise(.,count=n())%>%arrange(desc(count))
-# head(broadway.count)
+# Running Weeks
+broadway.count <- broadway%>%select(.,Show.Name,typecolor)%>%group_by(.,Show.Name)%>%
+  summarise(.,count=n(),Type.Color=first(typecolor))%>%arrange(desc(count))%>%top_n(20, count)
+broadway.count
 # ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
 
@@ -34,8 +41,8 @@ ggplot(broadway.price, aes(x = factor(Date.Month), y = Price)) +
   geom_boxplot(aes(fill = Price), colour = "white", width = 0.4,
                outlier.shape = NA, alpha = 0.4) + 
   coord_flip()+ theme(legend.position="bottom")+
-  scale_color_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
-  scale_fill_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+  scale_color_paletteer_d(wesanderson, Royal2, direction = -1) +
+  scale_fill_paletteer_d(wesanderson, Royal2, direction = -1) +
   labs(x = "", y = "Price") +
   theme(text = element_text(colour = "white", family = "AnimeAce"),
         plot.title = element_text(family = "AnimeAceBold", size = rel(1.5)),

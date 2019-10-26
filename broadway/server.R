@@ -1,3 +1,4 @@
+#function library
 library(shiny)
 library(data.table)
 library(tidyverse)
@@ -7,19 +8,24 @@ library(wordcloud2)
 library(glue)
 library(visNetwork)
 
-
+#color library
 library(paletteer)
-install.packages("remotes")
-install.packages('ghibli')
+library("wesanderson")
 back_col <- paletteer_d(ghibli, MarnieLight1)[2]
+
+#font library
 library("extrafont")
 fonttable()
 
 
+# read data 
 broadway <- fread(file = "./broadway.csv")
+broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
+                                                    Show.Type == "Play" ~ "#E00008",
+                                                    Show.Type == "Special" ~ "#858B8E"))
 
 
-
+#server 
 server <- function(input, output) {
     
     # broadway running week data
@@ -27,14 +33,18 @@ server <- function(input, output) {
         req(input$showtype)
         filter(broadway, Show.Type %in% input$showtype)%>%
             filter(., Date.Year %in% c(input$showyear[1]:input$showyear[2]))%>%
-            select(.,Show.Name)%>%group_by(.,Show.Name)%>%
-            summarise(.,count=n())%>%arrange(desc(count))%>%top_n(20)
+            select(.,Show.Name,typecolor)%>%group_by(.,Show.Name)%>%
+            summarise(.,count=n(),Type.Color=first(typecolor))%>%arrange(desc(count))%>%top_n(20,count)%>%ungroup()
     })
     broadway.mean <- reactive({
         req(input$showtype)
-        filter(broadway, Show.Type %in% input$showtype)%>%select(.,Show.Name)%>%group_by(.,Show.Name)%>%
+        filter(broadway, Show.Type %in% input$showtype)%>%
+          filter(., Date.Year %in% c(input$showyear[1]:input$showyear[2]))%>%
+          select(.,Show.Name)%>%group_by(.,Show.Name)%>%
             summarise(.,count=n())%>%summarise(.mean=mean(count))
     })
+    
+    
     
     # broadway price data
     broadway.price <- reactive({
@@ -50,22 +60,20 @@ server <- function(input, output) {
         
         
         ggplot(data = broadway.count(),aes(x = reorder(Show.Name, -count), y = count)) + 
-            geom_bar(stat="identity",show.legend = FALSE) +
-            geom_hline(aes(yintercept = broadway.mean()[[1]]), linetype = 2, show.legend = FALSE) +
+            geom_bar(fill = "Black",stat="identity") +
+            geom_hline(aes(yintercept = broadway.mean()[[1]]), color="#E00008",linetype = 2) +
             geom_text(data = broadway.count(), aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
-                      hjust = 1.1, family = "Courier") +
-            labs(x = "Track", y = "Running Weeks") +
+                      hjust = 1.1) +
+            labs(y = "Running Weeks") +
             theme_minimal() +
-            theme(text = element_text(family = "Courier"),
-                  panel.grid.minor.x = element_blank(),
+            theme(panel.grid.minor.x = element_blank(),
                   axis.line.x = element_line(colour = "black", size = 1),
                   axis.text = element_text(size = 12),
                   panel.grid.major.x = element_blank(),
                   axis.ticks.x = element_line(),
                   plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")) +
             theme(axis.title.x=element_blank(),
-                  axis.text.x=element_blank(),
-                  axis.ticks.x=element_blank())
+                  axis.text.x=element_blank())
         
     }, height = 500, width = 800)
     
@@ -81,12 +89,12 @@ server <- function(input, output) {
       
       ggplot(broadway.price(), aes(x = factor(Date.Month), y = Price)) +
         geom_jitter(aes(size = Price, fill = Show.Type),
-                    width = 0.1, alpha = 0.6, shape = 21) +
+                    width = 0.1, alpha = 0.3, shape = 21) +
         geom_boxplot(aes(fill = Price), colour = "white", width = 0.4,
                      outlier.shape = NA, alpha = 0.4) + 
         coord_flip()+ theme(legend.position="bottom")+
-        scale_color_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
-        scale_fill_paletteer_d(ghibli, YesterdayMedium, direction = -1) +
+        scale_color_paletteer_d(wesanderson, Royal2, direction = -1) +
+        scale_fill_paletteer_d(wesanderson, Royal2, direction = -1) +
         labs(x = "", y = "Price") +
         theme(text = element_text(colour = "white", family = "AnimeAce"),
               plot.title = element_text(family = "AnimeAceBold", size = rel(1.5)),
