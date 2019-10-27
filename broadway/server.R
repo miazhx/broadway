@@ -20,6 +20,8 @@ fonttable()
 
 # read data 
 broadway <- fread(file = "./broadway.csv")
+theatre <- fread(file = "./theatre.csv")
+theatre1 <- theatre%>%select(Show.Theatre,Show.New.Name)
 broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
                                                     Show.Type == "Play" ~ "#E00008",
                                                     Show.Type == "Special" ~ "#858B8E"))
@@ -45,13 +47,12 @@ server <- function(input, output) {
     })
     
     
-    
     # broadway price data
     broadway.price <- reactive({
       req(input$showtype2)
       filter(broadway, Show.Type %in% input$showtype2)%>%
         filter(., Date.Year %in% c(input$showyear2[1]:input$showyear2[2]))%>%
-        sample_n(500)%>%
+        sample_n(300)%>%
         mutate(Price=Statistics.Gross/Statistics.Attendance)
     })  
     
@@ -64,6 +65,11 @@ server <- function(input, output) {
             geom_hline(aes(yintercept = broadway.mean()[[1]]), color="#E00008",linetype = 2) +
             geom_text(data = broadway.count(), aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
                       hjust = 1.1) +
+            geom_curve(aes(xend = 10, yend = 100,colour = "Black"), 
+                   data = broadway.count()%>%top_n(1),
+                   curvature = -0.2, 
+                   arrow = arrow(type = "closed", length = unit(0.2,"cm")),
+                   show.legend = FALSE) +
             labs(y = "Running Weeks") +
             theme_minimal() +
             theme(panel.grid.minor.x = element_blank(),
@@ -112,66 +118,44 @@ server <- function(input, output) {
       
     }, height = 500, width = 800)
 
-    # # word counts (excluding stop words) for word clouds
-    # word_counts <- reactive({
-    #     req(input$disc)
-    #     lovesongs_tidy %>%
-    #         filter(disc_number %in% input$disc_cloud) %>%
-    #         select(word) %>%
-    #         anti_join(stop_words, by = "word") %>%
-    #         #filter(word != "love") %>%
-    #         count(word, sort = TRUE)
-    # })
-    # 
-    # # Word Clouds
-    # output$wordcloud <- renderWordcloud2({
-    #     wordcloud2(word_counts(), size = 1.6, fontFamily = "Courier",
-    #                color=rep_len(pal[2:4], nrow(word_counts())), backgroundColor = "black")
-    # })
-    # 
-    # # Word search table
-    # output$counttable = DT::renderDataTable({
-    #     DT::datatable(word_counts(), options = list(lengthMenu = c(10, 20, 50), pageLength = 10),
-    #                   rownames = FALSE, colnames = c("Word", "Count"), class = 'compact',
-    #                   caption = 'Common words (e.g. the, is, at) are excluded')
-    # })
-    # 
-    # # Love Network
-    # 
-    # love_graph_data <- reactive({
-    #     req(input$love_list)
-    #     bigram_separated_love %>%
-    #         filter(word1 %in% input$love_list | word2 %in% input$love_list) %>% 
-    #         as_tbl_graph() %>% 
-    #         mutate(color.background = if_else(name %in% input$love_list, "#E00008", "black"),
-    #                color.border = if_else(name %in% input$love_list, "#E00008", "black"),
-    #                label = name,
-    #                labelHighlightBold = TRUE,
-    #                #size = if_else(name == "love", 70, 25),
-    #                font.face = "Courier",
-    #                font.size = if_else(name == "love", 70, 40),
-    #                font.color = if_else(name %in% input$love_list, "#E00008", "black"),
-    #                shape = if_else(name %in% input$love_list, "icon", "dot"),
-    #                icon.face = "FontAwesome",
-    #                icon.code = "f004",
-    #                icon.size = if_else(name == "love", 200, 100),
-    #                icon.color = if_else(name %in% input$love_list, "#E00008", "black")) %>% 
-    #         activate(edges) %>% 
-    #         mutate(hoverWidth = n,
-    #                selectionWidth = n,
-    #                scaling.max = 20)
-    #     
-    # }) 
-    # 
-    # 
-    # output$lovenetwork <- renderVisNetwork({
-    #     
-    #     visIgraph(love_graph_data()) %>% 
-    #         visInteraction(hover = TRUE, tooltipDelay = 0) %>% 
-    #         addFontAwesome()
-    #     
-    # })
-    # 
+    
+    
+    # theatre Network
+
+    theatre_graph_data <- reactive({
+        req(input$theatrelist)
+        theatre1 %>%
+            filter(Show.Theatre %in% input$theatrelist) %>%
+            as_tbl_graph() %>%
+            mutate(type = if_else(name %in% theatre$Show.Theatre, "Theatre", "Show")) %>%
+            mutate(color.background = if_else(name %in% input$theatrelist, "#E00008", "black"),
+                   color.border = if_else(name %in% input$theatrelist, "#E00008", "black"),
+                   title = name,
+                   label = name,
+                   labelHighlightBold = TRUE,
+                   size = if_else(name == "American Airlines", 70, 25),
+                   font.face = "Courier",
+                   font.size = if_else(name == "American Airlines", 70, 40),
+                   font.color = if_else(name %in% input$theatrelist, "#E00008", "black"),
+                   shape = if_else(name %in% input$theatrelist, "icon", "dot"),
+                   icon.face = "FontAwesome",
+                   icon.code = "f005",
+                   icon.size = if_else(name == "American Airline", 200, 100),
+                   icon.color = if_else(name %in% input$theatrelist, "#E00008", "black")) %>%
+            activate(edges) %>%
+            mutate(scaling.max = 20)
+
+    })
+
+
+    output$theatrenetwork <- renderVisNetwork({
+
+        visIgraph(theatre_graph_data()) %>%
+            visInteraction(hover = TRUE, tooltipDelay = 0) %>%
+            addFontAwesome()
+
+    })
+
     # 
     # # sentiment plot
     # sentiment_pal <- c("black", "#E00008", "#858B8E", "#62A8E5", "#4000FF", "#1D2951")

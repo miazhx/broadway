@@ -3,11 +3,14 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(data.table)
+library(tidyverse)
+library(tidytext)
+library(tidygraph)
+library(wordcloud2)
+library(glue)
+library(visNetwork)
 
 library(paletteer)
-install.packages("remotes")
-install.packages('ghibli')
-install.packages('wesanderson')
 library("wesanderson")
 
 back_col <- paletteer_d(ghibli, MarnieLight1)[2]
@@ -18,10 +21,12 @@ windowsFonts("Courier" = windowsFont("Courier"))
 
 
 broadway <- fread(file = "./broadway.csv")
+theatre <- fread(file = "./theatre.csv")
 broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
                                                     Show.Type == "Play" ~ "#E00008",
                                                     Show.Type == "Special" ~ "#858B8E"))
-head(broadway)
+head(theatre)
+
 
 # Running Weeks
 broadway.count <- broadway%>%select(.,Show.Name,typecolor)%>%group_by(.,Show.Name)%>%
@@ -57,6 +62,29 @@ ggplot(broadway.price, aes(x = factor(Date.Month), y = Price)) +
         legend.box.background = element_rect(fill = back_col),
         legend.key = element_rect(fill = back_col,  colour = back_col),
         legend.title = element_text(size = rel(0.8)))
+
+# theatres 
+
+theatrelist <- c("American Airlines","Booth","Lyceum","Cort","Brooks Atkinson")
+
+theatre %>%
+  filter(Show.Theatre %in% theatrelist) %>%
+  as_tbl_graph()%>%
+  mutate(color.background = if_else(name %in% theatrelist, "#E00008", "black"),
+         color.border = if_else(name %in% theatrelist, "#E00008", "black"),
+  label = name,
+  labelHighlightBold = TRUE,
+  size = if_else(name == "American Airlines", 70, 25),
+  font.face = "Courier",
+  font.size = if_else(name == "American Airlines", 70, 40),
+  font.color = if_else(name %in% theatrelist, "#E00008", "black"),
+  shape = if_else(name %in% theatrelist, "icon", "dot"),
+  icon.face = "FontAwesome",
+  icon.code = "f004",
+  icon.size = if_else(name == "American Airline", 200, 100),
+  icon.color = if_else(name %in% theatrelist, "#E00008", "black")) %>%
+  activate(edges) %>%
+  mutate(scaling.max = 20)
 
 
 

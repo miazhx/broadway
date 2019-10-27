@@ -109,7 +109,34 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                           )
                  ),
         
-                 
+                 # Network diagram - theatre bigrams
+                 tabPanel("Broadway Threatres",
+                          fluidPage(sidebarLayout(position = "right",
+                                                  sidebarPanel(style = "background: black",
+                                                               wellPanel(style = "background: white",
+                                                                         checkboxGroupInput("theatrelist",
+                                                                                            "What theatres you want to see:",
+                                                                                            choices = c("American Airlines","Booth","Lyceum","Cort","Brooks Atkinson","Vivian Beaumont","Music Box","Belasco","Ethel Barrymore"),
+                                                                                            selected = "American Airlines",
+                                                                                            inline = TRUE)),
+                                                               wellPanel(style = "background: white",
+                                                                         h4("Info:"),
+                                                                         p("The words appearing before or after the word 'love' (and variants if chosen above), are shown in this network."),
+                                                                         p("Words appearing after 'love' have a red line, and words appearing before 'love' have a black line.")),
+                                                               wellPanel(style = "background: white",
+                                                                         h4("Interact:"),
+                                                                         p("Zoom in, drag, hover and select nodes to reveal the strength of the connection."),
+                                                                         p("For example, common combinations such as 'in love' and 'love you' have thicker lines."))),
+                                                  
+                                                  mainPanel( 
+                                                    p(strong(em("\"I'm for free love, and I'm in free fall. This could be love or nothing at all.\""), "1.4 - A Chicken With Its Head Cut Off")),
+                                                    br(),
+                                                    p("Let's put all this love into context. Explore the network of love below:"),
+                                                    visNetworkOutput("theatrenetwork", width = "100%", height = "565px")
+                                                  )
+                          )
+                          )
+                 ),                 
                  
                  # Sentiment analysis by disc and singer
                  tabPanel("Love and Trouble",
