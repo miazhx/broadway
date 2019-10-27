@@ -1,0 +1,13 @@
+name: broadway
+title: broadway
+username:
+account: miazhx
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1384858
+bundleId: 2539854
+url: https://miazhx.shinyapps.io/broadway/
+when: 1572147950.64671
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Data Processing.R

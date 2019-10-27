@@ -5,11 +5,9 @@ library(shiny)
 library(tidyverse)
 library(tidytext)
 library(tidygraph)
-library(wordcloud2)
-library(glue)
 library(visNetwork)
-
 library(shinyWidgets)
+
 
 
 ui <- navbarPage(inverse = TRUE, "Broadway Shows",
@@ -75,7 +73,7 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  
                  
                  # Third Page  - Dear Evan Hansen       
-                 tabPanel("DeaR Evan Hansen",
+                 tabPanel("Dear Evan Hansen",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
@@ -138,34 +136,18 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                           )
                  ),                 
                  
-                 # Sentiment analysis by disc and singer
-                 tabPanel("Love and Trouble",
-                          fluidPage(sidebarLayout(position = "right",
-                                                  sidebarPanel(style = "background: black",
-                                                               wellPanel(style = "background: white",
-                                                                         selectInput("sent_fill",
-                                                                                     "Colour bars by:",
-                                                                                     choices = c("Volume" = "disc_number", "Singer" = "singer"),
-                                                                                     selected = "disc_number")),
-                                                               wellPanel(style = "background: white",
-                                                                         p("Two songs, A Chicken with Its Head Cut Off and My Sentimental Melody, 
-                                                           have high proportions of both positive and negative words,
-                                                           suggesting they are 'songs of love and trouble'."),
-                                                                         p("I Shatter comfortably takes the most negative award.")),
-                                                               wellPanel(style = "background: white",
-                                                                         htmlOutput("sentiment_text"))),
-                                                  mainPanel(
-                                                      p(strong(em("\"Some of us can only live in songs of love and trouble.\""), "2.11 - My Only Friend")),
-                                                      br(),
-                                                      p("Let's try to assess sentiment, based on songs with the highest % of positive or negative words:"),
-                                                      br(),
-                                                      plotOutput("sentimentPlot"),
-                                                      br(),
-                                                      br(),
-                                                      p(strong("Notes:"), "Songs with less than 20 distinct words were not considered. So for example, Punk Love, with it's repeated refrain \"Punk Rock Love\" (3 pretty positive things right?) does not appear.",
-                                                        p("Positive and Negative sentiment was established using the Bing Lexicon."))
-                                                  )
-                          )
+                 # Blue blue blue
+                 tabPanel("Making Me Blue",
+                          fluidPage(p(strong(em("\"You know you enthrall me, and yet you don't call me. It's making me blue...\""), "1.5 - Reno Dakota")),
+                                    br(),
+                                    DTOutput("database", width = "100%", height = "380px"),
+                                    br(),
+                                    fluidRow(column(9,
+                                                    p("The protagonist in 'Reno Dakota' not only sings of being blue, but can describe the feeling with an exact hue.",
+                                                      p("However, perhaps Pantone 292 doesn't convey", em("your"), "blue-ness accurately.
+                                   Why not try another shade on for size?"), 
+                                                      p("Choose from a selected palette of popular blues on the right.")))
+                                    )
                           )
                  )
 )

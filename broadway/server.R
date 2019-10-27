@@ -4,9 +4,16 @@ library(data.table)
 library(tidyverse)
 library(tidytext)
 library(tidygraph)
-library(wordcloud2)
-library(glue)
 library(visNetwork)
+library(rsconnect)
+
+
+# rsconnect
+options(repos = BiocInstaller::biocinstallRepos())
+getOption("repos")
+BiocInstaller::biocLite
+options(repos = BiocManager::repositories())
+rsconnect::setAccountInfo(name='miazhx', token='183A6BC278ABA1062FB3E91D49643CF2', secret='ac3bIPDCYCNzH9/rrFeFpeUqSmp+Iwk23ZMviBS7')
 
 #color library
 library(paletteer)
@@ -25,6 +32,7 @@ theatre1 <- theatre%>%select(Show.Theatre,Show.New.Name)
 broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
                                                     Show.Type == "Play" ~ "#E00008",
                                                     Show.Type == "Special" ~ "#858B8E"))
+reading_table <- theatre %>%select(Date.Year,Show.Name,Show.Theatre,Show.Type)
 
 
 #server 
@@ -155,71 +163,20 @@ server <- function(input, output) {
             addFontAwesome()
 
     })
+    
+    output$database <- renderDT({
+      
+      datatable(reading_table,
+                colnames = c("Year","Show Name","Theatre","Show Type"),
+                rownames = FALSE,
+                escape = FALSE,
+                class = 'display',
+                options = list(pageLength = 20,
+                               lengthMenu = c(10, 20, 50))
+                
+      )
+    })
 
-    # 
-    # # sentiment plot
-    # sentiment_pal <- c("black", "#E00008", "#858B8E", "#62A8E5", "#4000FF", "#1D2951")
-    # 
-    # output$sentimentPlot <- renderPlot({
-    #     ggplot(song_sentiment_tidy, aes(x = order, y = perc)) +
-    #         geom_col(aes_string(fill = input$sent_fill)) + 
-    #         geom_text(aes(label = song, y = 0.48), hjust = 1,
-    #                   family = "Courier") +
-    #         geom_text(aes(label = scales::percent(perc, accuracy = .1)), hjust = 1.1,
-    #                   family = "Courier", colour = "white") +
-    #         coord_flip() +
-    #         facet_wrap(~ sentiment, scales = "free_y") +
-    #         scale_x_continuous(breaks = song_sentiment_tidy$order,
-    #                            expand = c(0,0)) +
-    #         scale_y_continuous(expand = c(0,0), labels = scales::percent_format(accuracy = 1),
-    #                            limits = c(0,0.5)) +
-    #         scale_fill_manual(values = sentiment_pal) +
-    #         labs(y = "\n% of Positive/Negative Sentiment", fill = NULL) +
-    #         theme_minimal() +
-    #         theme(text = element_text(family = "Courier"),
-    #               panel.grid.minor.y = element_blank(),
-    #               panel.spacing = unit(1, "cm"),
-    #               panel.border = element_rect(fill = NA, colour = "black", size = 1),
-    #               strip.background = element_rect(fill = "white", colour = "black", size = 1),
-    #               strip.text = element_text(colour = "black", face = "bold", size = 18),
-    #               #axis.line.y = element_line(colour = "black", size = 1),
-    #               panel.grid.major.y = element_blank(),
-    #               axis.text.y = element_blank(),
-    #               axis.title.y = element_blank(),
-    #               axis.ticks.x = element_line(),
-    #               plot.margin = margin(t = 0, r = 10, b = 0, l = 0, unit = "pt"),
-    #               legend.position = "bottom") +
-    #         guides(fill = guide_legend(nrow = 1))
-    # })
-    # 
-    # # Sentiment text
-    # output$sentiment_text <- renderUI({
-    #     if (input$sent_fill == "disc_number") {
-    #         HTML("<h4>Volumes:</h4><p>No songs from Volume 3 appear in the top 10 most positive list, with the majority coming from Volume 1.</p><p>3 songs from Volume 3 do appear in the negative list. Is Volume 3 the dark album?</p>")
-    #     } else {
-    #         HTML("<h4>Singers:</h4><p>Four guest vocalists appear on 69 Love Songs.</p><p>Dudley Klute takes on 2 of the highest proportioned negative songs, but misses out on the most positive songs.</p>")
-    #     }
-    # })
-    # 
-    # # Plot of blues
-    # blueshades <- tibble(colourname = c("Pantone 292", "Crayola Blue", "Liberty", "Space Cadet", "Teal", "Ultramarine"),
-    #                      colourhex = c("#62A8E5", "#1F75FE", "#545AA7", "#1D2951", "#008080", "#4000FF"))
-    # 
-    # blueshade <- reactive({
-    #     blueshades %>% 
-    #         filter(colourname == input$shade)
-    # })
-    # 
-    # output$blues <- renderPlot({
-    #     ggplot(tibble(x = 1:10, y = 1:10, label = paste0("...", blueshade()$colourname)), 
-    #            aes(x, y)) +
-    #         geom_point(colour = blueshade()$colourhex, show.legend = FALSE) +
-    #         geom_text(aes(label = label, x = 5, y = 5), family = "Courier", size = 8,
-    #                   colour = "white", show.legend = FALSE) +
-    #         scale_x_continuous(limits = c(0, 10), expand = c(0,0)) +
-    #         scale_y_continuous(limits = c(0, 10), expand = c(0,0)) +
-    #         theme_void() +
-    #         theme(plot.background = element_rect(fill = blueshade()$colourhex, colour = blueshade()$colourhex))
-    # })
+   
 }
 
