@@ -121,11 +121,11 @@ server <- function(input, output) {
         paste0(paste(broadway.count()[[1]][1:5], sep="", collapse = ', ')," are the longest running shows from ",input$showyear[1], " to ", input$showyear[2], "." )
     })
     
-    # # word clouds
-    # output$wordcloud <- renderWordcloud2({
-    #   wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
-    #              color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
-    # })
+    # word clouds
+    output$wordcloud <- renderWordcloud2({
+      wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
+                 color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
+    })
     
     #Dear Evan Hansen - Price
     output$broadwayprice <- renderPlot({
