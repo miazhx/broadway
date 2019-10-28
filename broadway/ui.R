@@ -1,4 +1,4 @@
-# Broadway Shows Analysis
+# Broadway Shows Spotlight
 
 # Load libraries
 library(shiny)
@@ -7,6 +7,7 @@ library(tidytext)
 library(tidygraph)
 library(visNetwork)
 library(shinyWidgets)
+library(wordcloud2)
 
 
 
@@ -14,31 +15,33 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  
                  # First Page - Intro        
                  tabPanel("Intro", includeCSS("styles.css"),
-                          fluidPage(h1("Spotlight: What to know about Broadway Shows"),
+                          fluidPage(h1("Broadway Spotlight: "),
                                     br(),
-                                    p(strong(em("\"Don't fall in love with me yet, we've only recently met...\""), "1.1 - Absolutely Cuckoo")),
+                                    p(strong(em("\"Give my regards to Broadway, remember me to Herald Square, tell all the gang at 42nd Street, that I will soon be there\""), " - George M. Cohan")),
                                     br(),
-                                    p("In 1999, the indie-pop band", a("Magnetic Fields", href = "https://en.wikipedia.org/wiki/The_Magnetic_Fields"), "released the album", 
-                                      a("69 Love Songs.", href = "https://www.mergerecords.com/69-love-songs"), 
-                                      "Conceived and written by frontman, Stephin Merritt, it is a three-volume concept album containing (yep, you guessed it) 69 love songs."), 
-                                    p("Merritt has described the album as \"...not remotely an album about love. It's an album about love songs...\""),
-                                    p("So, what does Stephin sing about when he sings about love (songs)?"),
-                                    p("Play with this interactive tool and find out!"),
+                                    p(a("Broadway theatre,", href = "https://en.wikipedia.org/wiki/Broadway_theatre"),"also known simply as Broadway, refers to the theatrical performances presented in professional theatres, each with 500 or more seats located in the Theater District and Lincoln Center along Broadway, in Midtown Manhattan, New York City." 
+                                      
+                                      ), 
+                                    p("So, what do we need to know about Broadway Shows?"),
+                                    p("Let's play with this interactive tool and find out!"),
                                     br(),
                                     br(),
                                     #div(img(src = "magfieldsstrip.png", height = 187, width = 800), style="text-align: center;"),
                                     br(),
                                     br(),
                                     br(),
+                                    # wordcloud2Output("wordcloud", width = "100%", height = "565px")
+                                    br(),
+                                    br(),
+                                    br(),
                                     div(p(strong("Built by"), a("Mia Zhang", href = "https://github.com/miazhx/broadway"), "using the power of Rstudio and Shiny."), 
-                                        p(strong("R Packages:"), "tidyverse, tidytext, wordcloud2, tidygraph, vizNetwork, glue."),
                                         p(strong("Sources:"), a("CORGIS Dataset Project", href = "https://corgis-edu.github.io/corgis/csv/broadway/"), "for data,", a("David Smale", href = "https://twitter.com/committedtotape"), "for design."),
                                         style="text-align: right;")
                           )
                  ),
                  
-                 # Second Page  - The Book of Shows       
-                 tabPanel("The Book of Shows",
+                 # Running Weeks       
+                 tabPanel("Running Weeks",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
@@ -54,9 +57,10 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                                          h3("Longest Running Shows:"),
                                                                          textOutput("shownames"),
                                                                          br(),
-                                                                         p("It never goes wrong with these shows!")),
+                                                                         p("If it's your first time, you can't go wrong with classics!")),
                                                                wellPanel(style = "background: white",
-                                                                         h3("Notes:")             
+                                                                         h3("Notes:"),
+                                                                         p("The red line represents the average running weeks for the selected show type and year range.")
                                                                )
                                                   ),
                                                   
@@ -72,11 +76,15 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  ),
                  
                  
-                 # Third Page  - Dear Evan Hansen       
-                 tabPanel("Dear Evan Hansen",
+                 # Price       
+                 tabPanel("Price",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
+                                                                         # selectInput("xaxistype",
+                                                                         #             "Select value:",
+                                                                         #             choices = c("Price" = "Price", "Gross" = "Statistics.Gross", "Capacity" = "Statistics.Capacity","Attendance"="Statistics.Attendance","Performances"="Statistics.Performances"),
+                                                                         #             selected = 1),
                                                                          checkboxGroupInput("showtype2",
                                                                                             "Select Show Type:",
                                                                                             choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
@@ -87,17 +95,17 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                                                      max = 2016, value = c(1991, 2016),
                                                                                      sep="")),
                                                                wellPanel(style = "background: white",
-                                                                         h3("Longest Running Shows:"),
-                                                                         textOutput("shownames2"),
-                                                                         br(),
-                                                                         p("It never goes wrong with these shows!")),
+                                                                         h3("Notes:"),
+                                                                         p("Price is weekly gross divided by weekly attendance, which is an average price for seats in different sections such as orchestra, mezzanine and balcony.")),
                                                                wellPanel(style = "background: white",
-                                                                         h3("Notes:")             
+                                                                         h3("What's your choice:"),
+                                                                         p("Musical or Play?"),
+                                                                         p("Holiday Season or Not Holiday Season?"),
                                                                )
                                                   ),
                                                   
                                                   mainPanel(
-                                                    p(strong(em("\"In inches, in miles, in laughter, in strife, in 525,600 minutes, how do you measure a year in the life?\""), "Seasons of Love - Rent")),
+                                                    p(strong(em("\"There was a time when love was blind, and the world was a song.\""), "I Dreamed a Dream - Les Miserables")),
                                                     br(),
                                                     p("Let's measure this by the number of running weeks for each show."),
                                                     br(),
@@ -108,45 +116,84 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  ),
         
                  # Network diagram - theatre bigrams
-                 tabPanel("Broadway Threatres",
+                 tabPanel("Broadway Theatres",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
                                                                          checkboxGroupInput("theatrelist",
-                                                                                            "What theatres you want to see:",
+                                                                                            "Theatres host most shows:",
                                                                                             choices = c("American Airlines","Booth","Lyceum","Cort","Brooks Atkinson","Vivian Beaumont","Music Box","Belasco","Ethel Barrymore"),
                                                                                             selected = "American Airlines",
                                                                                             inline = TRUE)),
                                                                wellPanel(style = "background: white",
                                                                          h4("Info:"),
-                                                                         p("The words appearing before or after the word 'love' (and variants if chosen above), are shown in this network."),
-                                                                         p("Words appearing after 'love' have a red line, and words appearing before 'love' have a black line.")),
+                                                                         p("Each red star represents a theatre which hosts the most shows and each black dot represents a Broadway show from 1991 to 2016."),
+                                                                         p("The lines link a show to the theatre(s) they were at.")),
                                                                wellPanel(style = "background: white",
                                                                          h4("Interact:"),
                                                                          p("Zoom in, drag, hover and select nodes to reveal the strength of the connection."),
-                                                                         p("For example, common combinations such as 'in love' and 'love you' have thicker lines."))),
+                                                                         p("For example, Macbeth has 4 productions in 4 different theatres in 25 years."))),
                                                   
                                                   mainPanel( 
-                                                    p(strong(em("\"I'm for free love, and I'm in free fall. This could be love or nothing at all.\""), "1.4 - A Chicken With Its Head Cut Off")),
+                                                    p(strong(em("\"From the west, from the south. Honey in my ears, spice in my mouth.\""), "Omar Sharif - The Band's Visit")),
                                                     br(),
-                                                    p("Let's put all this love into context. Explore the network of love below:"),
+                                                    p("Explore the network of shows and theatres below:"),
                                                     visNetworkOutput("theatrenetwork", width = "100%", height = "565px")
                                                   )
                           )
                           )
-                 ),                 
+                 ),   
                  
-                 # Blue blue blue
-                 tabPanel("Making Me Blue",
-                          fluidPage(p(strong(em("\"You know you enthrall me, and yet you don't call me. It's making me blue...\""), "1.5 - Reno Dakota")),
+                 
+                 # # Gross       
+                 # tabPanel("Gross",
+                 #          fluidPage(sidebarLayout(position = "right",
+                 #                                  sidebarPanel(style = "background: black",
+                 #                                               wellPanel(style = "background: white",
+                 #                                                         selectInput("xaxistype3",
+                 #                                                                     "Select value:",
+                 #                                                                     choices = c("Price" = "Price", "Gross" = "Statistics.Gross", "Capacity" = "Statistics.Capacity","Attendance"="Statistics.Attendance","Performances"="Statistics.Performances"),
+                 #                                                                     selected = 1),
+                 #                                                         checkboxGroupInput("showtype3",
+                 #                                                                            "Select Show Type:",
+                 #                                                                            choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
+                 #                                                                            selected = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),inline = TRUE),
+                 #                                                         
+                 #                                                         sliderInput("showyear3",
+                 #                                                                     "Select Year Range:",min = 1991, 
+                 #                                                                     max = 2016, value = c(1991, 2016),
+                 #                                                                     sep="")),
+                 #                                               wellPanel(style = "background: white",
+                 #                                                         h3("Longest Running Shows:"),
+                 #                                                         textOutput("shownames3"),
+                 #                                                         br(),
+                 #                                                         p("If it's your first time, you can't go wrong with classics!")),
+                 #                                               wellPanel(style = "background: white",
+                 #                                                         h3("Find out yourself:")             
+                 #                                               )
+                 #                                  ),
+                 #                                  
+                 #                                  mainPanel(
+                 #                                    p(strong(em("\"There was a time when love was blind, and the world was a song.\""), "I Dreamed a Dream - Les Miserables")),
+                 #                                    br(),
+                 #                                    p("Let's measure this by the number of running weeks for each show."),
+                 #                                    br(),
+                 #                                    plotOutput("showgross", width = "100%")
+                 #                                  )
+                 #          )
+                 #          )
+                 # ),                 
+                 
+                 # database 
+                 tabPanel("The Book of Shows",
+                          fluidPage(p(strong(em("\"When you're falling in a forest and there's nobody around, do you ever really crash, or even make a sound?\""), "Waving Through A Window - Dear Evan Hansen")),
                                     br(),
                                     DTOutput("database", width = "100%", height = "380px"),
                                     br(),
                                     fluidRow(column(9,
-                                                    p("The protagonist in 'Reno Dakota' not only sings of being blue, but can describe the feeling with an exact hue.",
-                                                      p("However, perhaps Pantone 292 doesn't convey", em("your"), "blue-ness accurately.
-                                   Why not try another shade on for size?"), 
-                                                      p("Choose from a selected palette of popular blues on the right.")))
+                                                    p("The dataset stretches from the 1990s to August 2016, and only shows that reported capacity were included.",
+                                                      p("It is made available by the Broadway League and organized by Austin Cory Bart from the CORGIS Dataset Project.") 
+                                                      ))
                                     )
                           )
                  )

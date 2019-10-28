@@ -19,19 +19,35 @@ library("extrafont")
 fonttable()
 windowsFonts("Courier" = windowsFont("Courier"))
 
+reviews <- readr::read_csv("reviews.csv")
 
+reviews <- fread(file = "./reviews1.csv", stringsAsFactors = FALSE)
 broadway <- fread(file = "./broadway.csv")
 theatre <- fread(file = "./theatre.csv")
 broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
                                                     Show.Type == "Play" ~ "#E00008",
                                                     Show.Type == "Special" ~ "#858B8E"))
-head(theatre)
+head(reviews)
+reviews_tidy <- reviews %>% 
+  unnest_tokens(word, reviews)
 
+stop_words
+pal <- c("black", "#E00008", "#858B8E", "white")
+
+word_counts <- 
+  reviews_tidy  %>% 
+    select(word) %>% 
+    anti_join(stop_words, by = "word") %>%
+    #filter(word != "love") %>% 
+    count(word, sort = TRUE) 
+
+wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
+           color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
 
 # Running Weeks
 broadway.count <- broadway%>%select(.,Show.Name,typecolor)%>%group_by(.,Show.Name)%>%
-  summarise(.,count=n(),Type.Color=first(typecolor))%>%arrange(desc(count))%>%top_n(20, count)
-broadway.count
+  summarise(.,count=n(),Type.Color=first(typecolor))%>%arrange(desc(count))%>%top_n(20, count)%>%ungroup()
+broadway.count$Type.Color
 # ggplot(data = broadway.count,aes(x = reorder(Show.Name, -count), y = count)) + geom_bar(stat="identity")
 
 
