@@ -9,7 +9,7 @@ library(visNetwork)
 library(rsconnect)
 
 
-# rsconnect
+# rsconnect - NOT WORKING ?
 options(repos = BiocInstaller::biocinstallRepos())
 getOption("repos")
 BiocInstaller::biocLite
@@ -18,7 +18,6 @@ rsconnect::setAccountInfo(name='miazhx', token='183A6BC278ABA1062FB3E91D49643CF2
 
 #color library
 library(paletteer)
-library("wesanderson")
 pal <- c("black", "#E00008", "#858B8E", "white")
 back_col <- paletteer_d(ghibli, MarnieLight1)[2]
 
@@ -34,28 +33,20 @@ theatre1 <- theatre%>%select(Show.Theatre,Show.New.Name)
 Database <- fread(file = "./database.csv")
 reviews <- readr::read_csv("reviews.csv")
 
+# future work - add color to show type
 # broadway <- broadway%>%mutate(.,typecolor=case_when(Show.Type == "Musical" ~ "black",
 #                                                     Show.Type == "Play" ~ "#E00008",
 #                                                     Show.Type == "Special" ~ "#858B8E"))
 
 # tidy text
-reviews_tidy <- reviews %>% 
-  unnest_tokens(word, reviews)
-
-
-word_counts <- 
-  reviews_tidy  %>% 
-  select(word) %>% 
-  anti_join(stop_words, by = "word") %>%
-  #filter(word != "love") %>% 
-  count(word, sort = TRUE) 
-
+reviews_tidy <- reviews %>% unnest_tokens(word, reviews)
+word_counts <- reviews_tidy  %>% select(word) %>% anti_join(stop_words, by = "word") %>% count(word, sort = TRUE) 
 
 
 #server 
 server <- function(input, output) {
     
-    # broadway running week data
+    # running weeks data
     broadway.count <- reactive({
         req(input$showtype)
         filter(broadway, Show.Type %in% input$showtype)%>%
@@ -63,6 +54,7 @@ server <- function(input, output) {
             select(.,Show.Name)%>%group_by(.,Show.Name)%>%
             summarise(.,count=n())%>%arrange(desc(count))%>%top_n(20,count)%>%ungroup()
     })
+    
     broadway.mean <- reactive({
         req(input$showtype)
         filter(broadway, Show.Type %in% input$showtype)%>%
@@ -71,13 +63,14 @@ server <- function(input, output) {
             summarise(.,count=n())%>%summarise(.mean=mean(count))
     })
     
-    yend <- reactive({
-      req(input$showtype)
-      filter(broadway, Show.Type %in% input$showtype)%>%
-        filter(., Date.Year %in% c(input$showyear[1]:input$showyear[2]))%>%
-        select(.,Show.Name)%>%group_by(.,Show.Name)%>%
-        summarise(.,count=n())%>%summarise(.,max=max(count))
-    })
+    # future work - add arrow 
+    # yend <- reactive({
+    #   req(input$showtype)
+    #   filter(broadway, Show.Type %in% input$showtype)%>%
+    #     filter(., Date.Year %in% c(input$showyear[1]:input$showyear[2]))%>%
+    #     select(.,Show.Name)%>%group_by(.,Show.Name)%>%
+    #     summarise(.,count=n())%>%summarise(.,max=max(count))
+    # })
     
     # broadway price data
     broadway.price <- reactive({
@@ -88,15 +81,21 @@ server <- function(input, output) {
         mutate(Price=Statistics.Gross/Statistics.Attendance)
     })  
     
-    # The Book of Shows
+    # word clouds
+    output$wordcloud <- renderWordcloud2({
+      wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
+                 color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
+    })
+    
+    
+    # running weeks
     output$bookofshows <- renderPlot({
-        
-        
         ggplot(data = broadway.count(),aes(x = reorder(Show.Name, -count), y = count)) + 
             geom_bar(fill = "Black",stat="identity") +
             geom_hline(aes(yintercept = broadway.mean()[[1]]), color="#E00008",linetype = 2) +
             geom_text(data = broadway.count(), aes(label = Show.Name), angle = 90, size = 3.8, colour = "white",
                       hjust = 1.1) +
+            # future work - add curve 
             # geom_curve(aes(xend = 3, yend = yend()[[1]]+5,color = "#E00008"), 
             #        data = broadway.count()%>%top_n(1),
             #        curvature = -0.2, 
@@ -112,7 +111,6 @@ server <- function(input, output) {
                   plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt")) +
             theme(axis.title.x=element_blank(),
                   axis.text.x=element_blank())
-        
     }, height = 500, width = 800)
     
     
@@ -121,24 +119,19 @@ server <- function(input, output) {
         paste0(paste(broadway.count()[[1]][1:5], sep="", collapse = ', ')," are the longest running shows from ",input$showyear[1], " to ", input$showyear[2], "." )
     })
     
-    # word clouds
-    output$wordcloud <- renderWordcloud2({
-      wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
-                 color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
-    })
+
     
-    #Dear Evan Hansen - Price
+    # Price
     output$broadwayprice <- renderPlot({
-      
-      
       ggplot(broadway.price(), aes(x = factor(Date.Month), y = Price)) +
         geom_jitter(aes(size = Price, fill = Show.Type),
-                    width = 0.1, alpha = 0.6, shape = 21,colour="Grey") +
+                    width = 0.1, alpha = 0.4, shape = 21,colour="Grey") +
         geom_boxplot(aes(fill = Price), colour = "white", width = 0.5,
                      outlier.shape = NA, alpha = 0.4) + 
         theme(legend.position="bottom")+
-        scale_color_paletteer_d(wesanderson, Royal1, direction = 1) +
-        scale_fill_paletteer_d(wesanderson, Royal1, direction = 1) +
+        scale_fill_manual(values = c("#E00008", "white","#e06800"))+
+        # scale_color_paletteer_d(wesanderson, Royal1, direction = 1) +
+        # scale_fill_paletteer_d(wesanderson, Royal1, direction = 1) +
         labs(x = "", y = "Price") +
         theme(text = element_text(colour = "white"),
               plot.title = element_text(size = rel(1.5)),
@@ -155,41 +148,6 @@ server <- function(input, output) {
               legend.title = element_text(size = rel(0.8)))
       
     }, height = 500, width = 800)
-
-    # # gross
-    # gross_pal <- c("black", "#E00008", "#858B8E", "#62A8E5", "#4000FF", "#1D2951")
-    # 
-    # output$showgross <- renderPlot({
-    #   ggplot(song_sentiment_tidy, aes(x = order, y = perc)) +
-    #     geom_col(aes_string(fill = input$sent_fill)) + 
-    #     geom_text(aes(label = song, y = 0.48), hjust = 1,
-    #               family = "Courier") +
-    #     geom_text(aes(label = scales::percent(perc, accuracy = .1)), hjust = 1.1,
-    #               family = "Courier", colour = "white") +
-    #     coord_flip() +
-    #     facet_wrap(~ sentiment, scales = "free_y") +
-    #     scale_x_continuous(breaks = song_sentiment_tidy$order,
-    #                        expand = c(0,0)) +
-    #     scale_y_continuous(expand = c(0,0), labels = scales::percent_format(accuracy = 1),
-    #                        limits = c(0,0.5)) +
-    #     scale_fill_manual(values = sentiment_pal) +
-    #     labs(y = "\n% of Positive/Negative Sentiment", fill = NULL) +
-    #     theme_minimal() +
-    #     theme(text = element_text(family = "Courier"),
-    #           panel.grid.minor.y = element_blank(),
-    #           panel.spacing = unit(1, "cm"),
-    #           panel.border = element_rect(fill = NA, colour = "black", size = 1),
-    #           strip.background = element_rect(fill = "white", colour = "black", size = 1),
-    #           strip.text = element_text(colour = "black", face = "bold", size = 18),
-    #           #axis.line.y = element_line(colour = "black", size = 1),
-    #           panel.grid.major.y = element_blank(),
-    #           axis.text.y = element_blank(),
-    #           axis.title.y = element_blank(),
-    #           axis.ticks.x = element_line(),
-    #           plot.margin = margin(t = 0, r = 10, b = 0, l = 0, unit = "pt"),
-    #           legend.position = "bottom") +
-    #     guides(fill = guide_legend(nrow = 1))
-    # })
     
     
     # theatre Network
@@ -228,9 +186,8 @@ server <- function(input, output) {
     })
     
     
-    # Book of shows database    
+    # book of shows database    
     output$database <- renderDT({
-      
       datatable(Database,
                 colnames = c("Opening Year","Show Name","Show Type","Theatre"),
                 rownames = FALSE,
@@ -238,8 +195,7 @@ server <- function(input, output) {
                 class = 'display',
                 options = list(pageLength = 20,
                                lengthMenu = c(10, 20, 50))
-                
-      )
+                      )
     })
 
    

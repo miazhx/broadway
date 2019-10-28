@@ -10,7 +10,7 @@ library(shinyWidgets)
 library(wordcloud2)
 
 
-
+# ui
 ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  
                  # First Page - Intro        
@@ -26,12 +26,12 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                     p("Let's play with this interactive tool and find out!"),
                                     wordcloud2Output("wordcloud", width = "100%", height = "400px"),
                                     div(p(strong("Built by"), a("Mia Zhang", href = "https://github.com/miazhx/broadway"), "using the power of Rstudio and Shiny."), 
-                                        p(strong("Sources:"), a("CORGIS Dataset Project", href = "https://corgis-edu.github.io/corgis/csv/broadway/"), "for data,", a("David Smale", href = "https://twitter.com/committedtotape"), "for design."),
+                                        p(strong("Sources:"), a("CORGIS Dataset Project", href = "https://corgis-edu.github.io/corgis/csv/broadway/"), "Septembersky for data,", a("David Smale", href = "https://twitter.com/committedtotape"), "for design."),
                                         style="text-align: right;")
                           )
                  ),
                  
-                 # Running Weeks       
+                 # Second Page - Running Weeks       
                  tabPanel("Running Weeks",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
@@ -67,11 +67,12 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  ),
                  
                  
-                 # Price       
+                 # Third Page - Price       
                  tabPanel("Price",
                           fluidPage(sidebarLayout(position = "right",
                                                   sidebarPanel(style = "background: black",
                                                                wellPanel(style = "background: white",
+                                                                         # future work add inputs
                                                                          # selectInput("xaxistype",
                                                                          #             "Select value:",
                                                                          #             choices = c("Price" = "Price", "Gross" = "Statistics.Gross", "Capacity" = "Statistics.Capacity","Attendance"="Statistics.Attendance","Performances"="Statistics.Performances"),
@@ -136,46 +137,8 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                  ),   
                  
                  
-                 # # Gross       
-                 # tabPanel("Gross",
-                 #          fluidPage(sidebarLayout(position = "right",
-                 #                                  sidebarPanel(style = "background: black",
-                 #                                               wellPanel(style = "background: white",
-                 #                                                         selectInput("xaxistype3",
-                 #                                                                     "Select value:",
-                 #                                                                     choices = c("Price" = "Price", "Gross" = "Statistics.Gross", "Capacity" = "Statistics.Capacity","Attendance"="Statistics.Attendance","Performances"="Statistics.Performances"),
-                 #                                                                     selected = 1),
-                 #                                                         checkboxGroupInput("showtype3",
-                 #                                                                            "Select Show Type:",
-                 #                                                                            choices = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),
-                 #                                                                            selected = c("Musical" = "Musical", "Play" = "Play", "Special Performance" = "Special"),inline = TRUE),
-                 #                                                         
-                 #                                                         sliderInput("showyear3",
-                 #                                                                     "Select Year Range:",min = 1991, 
-                 #                                                                     max = 2016, value = c(1991, 2016),
-                 #                                                                     sep="")),
-                 #                                               wellPanel(style = "background: white",
-                 #                                                         h3("Longest Running Shows:"),
-                 #                                                         textOutput("shownames3"),
-                 #                                                         br(),
-                 #                                                         p("If it's your first time, you can't go wrong with classics!")),
-                 #                                               wellPanel(style = "background: white",
-                 #                                                         h3("Find out yourself:")             
-                 #                                               )
-                 #                                  ),
-                 #                                  
-                 #                                  mainPanel(
-                 #                                    p(strong(em("\"There was a time when love was blind, and the world was a song.\""), "I Dreamed a Dream - Les Miserables")),
-                 #                                    br(),
-                 #                                    p("Let's measure this by the number of running weeks for each show."),
-                 #                                    br(),
-                 #                                    plotOutput("showgross", width = "100%")
-                 #                                  )
-                 #          )
-                 #          )
-                 # ),                 
                  
-                 # database 
+                 # Final Page - Database 
                  tabPanel("The Book of Shows",
                           fluidPage(p(strong(em("\"When you're falling in a forest and there's nobody around, do you ever really crash, or even make a sound?\""), "Waving Through A Window - Dear Evan Hansen")),
                                     br(),
