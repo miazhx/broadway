@@ -125,7 +125,7 @@ server <- function(input, output) {
     output$broadwayprice <- renderPlot({
       ggplot(broadway.price(), aes(x = factor(Date.Month), y = Price)) +
         geom_jitter(aes(size = Price, fill = Show.Type),
-                    width = 0.1, alpha = 0.4, shape = 21,colour="Grey") +
+                    width = 0.1, alpha = 0.5, shape = 21,colour="Grey") +
         geom_boxplot(aes(fill = Price), colour = "white", width = 0.5,
                      outlier.shape = NA, alpha = 0.4) + 
         theme(legend.position="bottom")+

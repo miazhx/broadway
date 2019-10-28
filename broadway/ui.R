@@ -25,6 +25,7 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                     p("So, what do we need to know about Broadway Shows?"),
                                     p("Let's play with this interactive tool and find out!"),
                                     wordcloud2Output("wordcloud", width = "100%", height = "400px"),
+                                    br(),
                                     div(p(strong("Built by"), a("Mia Zhang", href = "https://github.com/miazhx/broadway"), "using the power of Rstudio and Shiny."), 
                                         p(strong("Sources:"), a("CORGIS Dataset Project", href = "https://corgis-edu.github.io/corgis/csv/broadway/"), "Septembersky for data,", a("David Smale", href = "https://twitter.com/committedtotape"), "for design."),
                                         style="text-align: right;")
@@ -51,7 +52,7 @@ ui <- navbarPage(inverse = TRUE, "Broadway Shows",
                                                                          p("If it's your first time, you can't go wrong with classics!")),
                                                                wellPanel(style = "background: white",
                                                                          h3("Notes:"),
-                                                                         p("The red line represents the average running weeks for the selected show type and year range.")
+                                                                         p("The red line represents the average running weeks for shows selected.")
                                                                )
                                                   ),
                                                   
