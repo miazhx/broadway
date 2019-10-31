@@ -7,6 +7,7 @@ library(tidygraph)
 library(wordcloud2)
 library(visNetwork)
 library(rsconnect)
+library(DT)
 
 
 # rsconnect - NOT WORKING ?

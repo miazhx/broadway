@@ -8,6 +8,8 @@ library(tidygraph)
 library(visNetwork)
 library(shinyWidgets)
 library(wordcloud2)
+library(data.table)
+library(DT)
 
 
 # ui
