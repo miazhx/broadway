@@ -10,21 +10,17 @@ library(rsconnect)
 library(DT)
 
 
-# rsconnect - NOT WORKING ?
-options(repos = BiocInstaller::biocinstallRepos())
-getOption("repos")
-BiocInstaller::biocLite
-options(repos = BiocManager::repositories())
+# rsconnect
 rsconnect::setAccountInfo(name='miazhx', token='183A6BC278ABA1062FB3E91D49643CF2', secret='ac3bIPDCYCNzH9/rrFeFpeUqSmp+Iwk23ZMviBS7')
 
+
 #color library
-library(paletteer)
 pal <- c("black", "#E00008", "#858B8E", "white")
-back_col <- paletteer_d(ghibli, MarnieLight1)[2]
+back_col <- "#2B2522"
 
 #font library
-library("extrafont")
-fonttable()
+# library("extrafont")
+# fonttable()
 
 
 # read data 
@@ -82,11 +78,11 @@ server <- function(input, output) {
         mutate(Price=Statistics.Gross/Statistics.Attendance)
     })  
     
-    # word clouds
+    # wordclouds
     output$wordcloud <- renderWordcloud2({
-      wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
-                 color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
-    })
+       wordcloud2(word_counts, size = 1.6, fontFamily = "Courier",
+                  color=rep_len(pal[2:4], nrow(word_counts)), backgroundColor = "black")
+     })
     
     
     # running weeks

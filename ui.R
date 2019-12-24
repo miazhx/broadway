@@ -1,5 +1,3 @@
-# Broadway Shows Spotlight
-
 # Load libraries
 library(shiny)
 library(tidyverse)
