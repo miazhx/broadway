@@ -12,11 +12,11 @@ Let's have fun playing with this interactive Shiny App and see what you can find
 ## Dataset
 The dataset stretches from the 1990s to August 2016, and only shows that reported capacity were included. Due to upload issues to shiny, the interactive word cloud is deactivated in the app. The dashboard has the following tabs:
 
-*Intro
-*Running Weeks
-*Price
-*Broadway Theatres
-*The Book of Shows
+* Intro
+* Running Weeks
+* Price
+* Broadway Theatres
+* The Book of Shows
 
 ## About Me
 
