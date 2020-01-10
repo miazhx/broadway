@@ -1,9 +1,9 @@
 # A Love Letter to Broadway
 
 
-Broadway theatre, also known simply as Broadway, refers to the theatrical performances presented in professional theatres, each with 500 or more seats located in the Theater District and Lincoln Center along Broadway, in Midtown Manhattan, New York City.
+``Broadway theater``, also known simply as Broadway, refers to the theatrical performances presented in professional theaters, each with 500 or more seats located in the Theater District and Lincoln Center along Broadway, in Midtown Manhattan, New York City.
 
-This [Shiny app][shiny] built in RStudio is created to send my love to Broadway.
+This [Shiny app][shiny] built in RStudio is created to send my love to Broadway. You can find my blog [here][blog].
 
 The dataset is made available by the Broadway League and organized by Austin Cory Bart from the [CORGIS Dataset Project][dataset]. The marvelous design is from [David Smale][design].
 
@@ -21,11 +21,10 @@ The dataset stretches from the 1990s to August 2016, and only shows that reporte
 ## About Me
 
 Hanxiao(Mia)Zhang
-[@LinkedIn](https://www.linkedin.com/in/zhanghanxiao/)
-[@Email](miazhx2013@gmail.com)
-
+[@LinkedIn](https://www.linkedin.com/in/zhanghanxiao/) - miazhx2013@gmail.com
 
 <!-- Markdown link & img dfn's -->
 [shiny]: https://miazhx.shinyapps.io/broadway/
 [dataset]: https://corgis-edu.github.io/corgis/csv/broadway/
 [design]: https://davidsmale.netlify.com/shiny-portfolio/#69-love-songs
+[blog]:https://nycdatascience.com/blog/student-works/a-love-letter-to-broadway/
